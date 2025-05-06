@@ -12,9 +12,13 @@ import os
 import csv
 import time
 from datetime import datetime
+from torch.cuda.amp import autocast, GradScaler
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+
+NO_ALBUMENTATIONS_UPDATE = 1
 
 SEGMENTATION_COLOURS = {0:[0,0,0],1:[255,0,0],2:[0,253,0],3:[0,0,250], 4:[253,255,0]}
-
 
 def calculate_iou(pred_mask, target_mask, num_classes=5):
     ious = []
@@ -119,11 +123,31 @@ def main():
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    train_dataset = SegmentationDataset('dataset/train', transform=transform)
-    val_dataset = SegmentationDataset('dataset/val', transform=transform)
+    train_dataset = SegmentationDataset(
+    'dataset/train',
+    transform=transform
+    # you can also pass resize=(256,256) here if you’d rather force a fixed size
+)
 
-    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=4)
+    val_dataset = SegmentationDataset(
+        'dataset/val',
+        transform=transform
+    )
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=8,
+        shuffle=True,
+        num_workers=4,
+        collate_fn=SegmentationDataset.collate_fn
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=8,
+        shuffle=False,
+        num_workers=4,
+        collate_fn=SegmentationDataset.collate_fn
+    )
 
     model = UNet(n_classes=5).to(device)
     
