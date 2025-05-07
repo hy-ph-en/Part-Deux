@@ -151,7 +151,7 @@ def main():
 
     model = UNet(n_classes=5).to(device)
     
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=50, device=device)

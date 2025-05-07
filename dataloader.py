@@ -105,6 +105,7 @@ class SegmentationDataset(Dataset):
     def collate_fn(batch):
         """
         Custom collate function to pad images and masks in a batch to the same size.
+        Pads images with 0, masks with 255 (ignored in loss)
         Usage:
             DataLoader(dataset, batch_size, collate_fn=SegmentationDataset.collate_fn)
         """
@@ -113,8 +114,9 @@ class SegmentationDataset(Dataset):
         # Find max height and width
         max_h = max(img.shape[1] for img in images)
         max_w = max(img.shape[2] for img in images)
-        # Pad images and masks to max dimensions (pad on right and bottom)
-        padded_images = [F.pad(img, (0, max_w - img.shape[2], 0, max_h - img.shape[1])) for img in images]
-        padded_masks = [F.pad(mask, (0, max_w - mask.shape[1], 0, max_h - mask.shape[0])) for mask in masks]
+        # Pad images (fill=0) and masks (fill=255) to max dimensions (right & bottom)
+        padded_images = [F.pad(img, (0, max_w - img.shape[2], 0, max_h - img.shape[1]), value=0) for img in images]
+        padded_masks = [F.pad(mask, (0, max_w - mask.shape[1], 0, max_h - mask.shape[0]), value=255) for mask in masks]
         # Stack into tensors
         return torch.stack(padded_images), torch.stack(padded_masks)
+
