@@ -1,54 +1,49 @@
-Welcome to the second part of the interview, this should only take a couple of hours (you can always use an LLM/copilot to do this). In this repo there is a simple image segmentation AI, with only four classes (front, back, sleeves, hood, the Labels have more classes but for simplicity ignore them), your task is to write a dataloader and improve the training to try to beat the following loss:
+# Garment Segmentation for 2D-to-3D Structure Inference
 
-| Epoch | Train Loss | Val Loss  | Mean IoU | Time (s) |
-|:-----:|:----------:|:---------:|:--------:|:--------:|
-|   1   |   1.229   |   2.422   |  0.080   |  7.201   |
-|   2   |   0.858   |   1.664   |  0.265   |  7.455   |
-|   3   |   0.749   |   1.770   |  0.256   |  6.803   |
-|   4   |   0.649   |   1.236   |  0.254   |  7.105   |
-|   5   |   0.566   |   0.755   |  0.516   |  7.128   |
-|   6   |   0.516   |   1.708   |  0.346   |  7.167   |
-|   7   |   0.489   |   0.976   |  0.483   |  7.492   |
-|   8   |   0.454   |   1.954   |  0.307   |  7.610   |
-|   9   |   0.409   |   1.393   |  0.372   |  7.565   |
-|  10   |   0.389   |   1.828   |  0.268   |  7.415   |
-|  11   |   0.381   |   2.482   |  0.222   |  7.245   |
-|  12   |   0.368   |   1.355   |  0.396   |  7.011   |
-|  13   |   0.352   |   2.041   |  0.290   |  7.288   |
-|  14   |   0.362   |   2.073   |  0.288   |  7.143   |
-|  15   |   0.335   |   1.268   |  0.435   |  7.367   |
-|  16   |   0.309   |   2.458   |  0.276   |  7.204   |
-|  17   |   0.294   |   1.991   |  0.312   |  7.295   |
-|  18   |   0.288   |   1.510   |  0.418   |  7.143   |
-|  19   |   0.287   |   1.459   |  0.396   |  7.015   |
-|  20   |   0.275   |   1.561   |  0.383   |  7.517   |
-|  21   |   0.267   |   1.873   |  0.401   |  7.112   |
-|  22   |   0.256   |   2.250   |  0.246   |  7.499   |
-|  23   |   0.256   |   1.803   |  0.359   |  7.377   |
-|  24   |   0.259   |   1.850   |  0.406   |  7.558   |
-|  25   |   0.251   |   1.338   |  0.522   |  7.479   |
-|  26   |   0.244   |   1.151   |  0.500   |  7.554   |
-|  27   |   0.237   |   1.427   |  0.464   |  8.150   |
-|  28   |   0.238   |   0.972   |  0.548   |  7.736   |
-|  29   |   0.234   |   0.332   |  0.761   |  7.325   |
-|  30   |   0.286   |   1.784   |  0.305   |  7.484   |
-|  31   |   0.299   |   4.461   |  0.207   |  7.709   |
-|  32   |   0.287   |   1.649   |  0.337   |  7.600   |
-|  33   |   0.262   |   3.454   |  0.218   |  7.399   |
-|  34   |   0.251   |   1.732   |  0.472   |  7.510   |
-|  35   |   0.240   |   1.826   |  0.449   |  7.314   |
-|  36   |   0.238   |   0.539   |  0.702   |  7.219   |
-|  37   |   0.232   |   1.985   |  0.424   |  7.332   |
-|  38   |   0.226   |   1.816   |  0.336   |  7.631   |
-|  39   |   0.228   |   1.662   |  0.341   |  7.839   |
-|  40   |   0.227   |   2.437   |  0.349   |  7.826   |
-|  41   |   0.222   |   1.605   |  0.310   |  7.332   |
-|  42   |   0.216   |   0.418   |  0.736   |  7.570   |
-|  43   |   0.215   |   1.551   |  0.373   |  7.657   |
-|  44   |   0.219   |   1.775   |  0.344   |  7.627   |
-|  45   |   0.215   |   0.718   |  0.644   |  8.224   |
-|  46   |   0.209   |   1.480   |  0.517   |  8.055   |
-|  47   |   0.215   |   0.314   |  0.772   |  7.254   |
-|  48   |   0.203   |   2.381   |  0.385   |  7.415   |
-|  49   |   0.200   |   1.382   |  0.425   |  7.116   |
-|  50   |   0.203   |   2.545   |  0.406   |  7.530   |
+This project builds upon and extends an existing image segmentation repository, originally designed for garment part labeling. The fork improves data handling, training stability, and segmentation quality, with the goal of supporting 2D-to-3D reconstruction workflows in digital fashion and spatial modeling applications.
+
+The segmentation task focuses on classifying pixels into four structural garment regions: **front**, **back**, **sleeves**, and **hood**. These regions serve as semantic primitives for 3D mesh generation, enabling structure-aware reconstruction from monocular images.
+
+## Project Objective
+
+The objective is to improve the segmentation pipeline by:
+- Implementing a custom, flexible PyTorch dataloader
+- Enhancing training with effective augmentation, normalization, and regularization
+- Achieving better segmentation performance as measured by **mean IoU** and **validation loss**
+- Providing a clean, extensible foundation for research into 2D-to-3D clothing reconstruction
+
+## Dataset
+
+The dataset consists of fashion product images and pixel-wise segmentation masks. While the label set includes more than four classes, only the following are used for this project:
+- `Front`
+- `Back`
+- `Sleeves`
+- `Hood`
+
+All other labels are excluded or remapped to background.
+
+## Methodology
+
+### Dataloader
+- Custom `torch.utils.data.Dataset` implementation
+- Supports data augmentation: random crops, flips, scaling, normalization
+- Dynamically remaps label masks to the target class set
+
+### Training
+- Loss function: cross-entropy with optional class balancing
+- Optimizer: Adam with cosine annealing or step-based learning rate schedule
+- Metrics tracked: training loss, validation loss, and mean IoU
+- Logging per epoch including training time
+
+### Evaluation
+- Validation performed after each epoch
+- Best models are selected based on validation performance (mean IoU)
+- Designed to beat the following baseline:
+
+
+## Installation
+
+```bash
+git clone https://github.com/yourusername/garment-segmentation-2d-to-3d.git
+cd garment-segmentation-2d-to-3d
+pip install -r requirements.txt
